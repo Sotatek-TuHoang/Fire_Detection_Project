@@ -3,6 +3,8 @@
   "files.associations": {
     "*.h": "c",
     "*.c": "c",
+    "task_module_sim": "c",
+    "cstdint": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM9",
