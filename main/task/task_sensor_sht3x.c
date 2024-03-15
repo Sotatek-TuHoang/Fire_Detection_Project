@@ -12,26 +12,24 @@ static TaskHandle_t TaskHandle;
 extern QueueHandle_t sensor_sht3x_queue;
 
 static const char *TAG = "SHT3X_Queue";
+static sht3x_sensors_values_t sht3x_values;
 
 void handle_sht3x()
 {
   sht3x_start_periodic_measurement_with_art();
 
-  sht3x_sensors_values_t sensors_values = {
-      .temperature = 0x00,
-      .humidity = 0x00};
   vTaskDelay(100 / portTICK_PERIOD_MS);
 
-  if (sht3x_read_measurement(&sensors_values) != ESP_OK)
+  if (sht3x_read_measurement(&sht3x_values) != ESP_OK)
   {
     ESP_LOGE(TAG, "Sensors read measurement error!");
   }
   vTaskDelay(100 / portTICK_PERIOD_MS);
 
-  float temperature = sensors_values.temperature;
-  float humidity = sensors_values.humidity;
+  float temperature = sht3x_values.temperature;
+  float humidity = sht3x_values.humidity;
 
-  ESP_LOG_BUFFER_HEX_LEVEL(TAG, &sensors_values, sizeof(sensors_values), ESP_LOG_DEBUG);
+  ESP_LOG_BUFFER_HEX_LEVEL(TAG, &sht3x_values, sizeof(sht3x_values), ESP_LOG_DEBUG);
 
   sht3x_stop_periodic_measurement();
 
