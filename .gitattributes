@@ -1,2 +1,6 @@
-# Auto detect text files and perform LF normalization
+# Đặt hành vi mặc định để tự động chuẩn hóa kết thúc dòng.
 * text=auto
+
+# Đặt kết thúc dòng CRLF cho các tệp cụ thể.
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
