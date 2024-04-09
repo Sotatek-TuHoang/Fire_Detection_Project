@@ -10,7 +10,8 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "module_sim.h"
+#include "A7680C.h"
+#include "uartdev.h"
 
 extern QueueHandle_t uart_msg_queue;
 TaskHandle_t mqtt_vPublish_task_handle = NULL;

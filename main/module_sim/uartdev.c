@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "module_sim.h"
+#include "uartdev.h"
 
 QueueHandle_t uart_msg_queue;
 

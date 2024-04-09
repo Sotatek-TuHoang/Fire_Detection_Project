@@ -6,7 +6,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
-#include "module_sim/module_sim.h"
+#include "module_sim/A7680C.h"
 #include "bme680/bme680.h"
 
 #define BME680_I2C_ADDR 0x77

@@ -9,22 +9,22 @@
 #define BME680_I2C_ADDR_0 0x76
 #define BME680_I2C_ADDR_1 0x77
 
-#define BME680_MAX_OVERFLOW_VAL      INT32_C(0x40000000) // overflow value used in pressure calculation (bme680_convert_pressure)
+#define BME680_MAX_OVERFLOW_VAL INT32_C(0x40000000) // overflow value used in pressure calculation (bme680_convert_pressure)
 
-#define BME680_HEATER_TEMP_MIN         200  //!< min. 200 degree Celsius
-#define BME680_HEATER_TEMP_MAX         400  //!< max. 200 degree Celsius
-#define BME680_HEATER_PROFILES         10   //!< max. 10 heater profiles 0 ... 9
-#define BME680_HEATER_NOT_USED         -1   //!< heater not used profile
+#define BME680_HEATER_TEMP_MIN 200 //!< min. 200 degree Celsius
+#define BME680_HEATER_TEMP_MAX 400 //!< max. 200 degree Celsius
+#define BME680_HEATER_PROFILES 10  //!< max. 10 heater profiles 0 ... 9
+#define BME680_HEATER_NOT_USED -1  //!< heater not used profile
 
 /**
  * Fixed point sensor values (fixed THPG values)
  */
 typedef struct
 {
-    int16_t temperature;     //!< temperature in degree C * 100 (Invalid value INT16_MIN)
-    uint32_t pressure;       //!< barometric pressure in Pascal (Invalid value 0)
-    uint32_t humidity;       //!< relative humidity in % * 1000 (Invalid value 0)
-    uint32_t gas_resistance; //!< gas resistance in Ohm         (Invalid value 0)
+  int16_t temperature;     //!< temperature in degree C * 100 (Invalid value INT16_MIN)
+  uint32_t pressure;       //!< barometric pressure in Pascal (Invalid value 0)
+  uint32_t humidity;       //!< relative humidity in % * 1000 (Invalid value 0)
+  uint32_t gas_resistance; //!< gas resistance in Ohm         (Invalid value 0)
 } bme680_values_fixed_t;
 
 /**
@@ -32,36 +32,38 @@ typedef struct
  */
 typedef struct
 {
-    float temperature;    //!< temperature in degree C        (Invalid value -327.68)
-    float pressure;       //!< barometric pressure in hPascal (Invalid value 0.0)
-    float humidity;       //!< relative humidity in %         (Invalid value 0.0)
-    float gas_resistance; //!< gas resistance in Ohm          (Invalid value 0.0)
+  float temperature;    //!< temperature in degree C        (Invalid value -327.68)
+  float pressure;       //!< barometric pressure in hPascal (Invalid value 0.0)
+  float humidity;       //!< relative humidity in %         (Invalid value 0.0)
+  float gas_resistance; //!< gas resistance in Ohm          (Invalid value 0.0)
 } bme680_values_float_t;
 
 /**
  * Filter size
  */
-typedef enum {
-    BME680_IIR_SIZE_0 = 0, //!< Filter is not used
-    BME680_IIR_SIZE_1,
-    BME680_IIR_SIZE_3,
-    BME680_IIR_SIZE_7,
-    BME680_IIR_SIZE_15,
-    BME680_IIR_SIZE_31,
-    BME680_IIR_SIZE_63,
-    BME680_IIR_SIZE_127
+typedef enum
+{
+  BME680_IIR_SIZE_0 = 0, //!< Filter is not used
+  BME680_IIR_SIZE_1,
+  BME680_IIR_SIZE_3,
+  BME680_IIR_SIZE_7,
+  BME680_IIR_SIZE_15,
+  BME680_IIR_SIZE_31,
+  BME680_IIR_SIZE_63,
+  BME680_IIR_SIZE_127
 } bme680_filter_size_t;
 
 /**
  * Oversampling rate
  */
-typedef enum {
-    BME680_OSR_NONE = 0, //!< Measurement is skipped, output values are invalid
-    BME680_OSR_1X,       //!< Default oversampling rates
-    BME680_OSR_2X,
-    BME680_OSR_4X,
-    BME680_OSR_8X,
-    BME680_OSR_16X
+typedef enum
+{
+  BME680_OSR_NONE = 0, //!< Measurement is skipped, output values are invalid
+  BME680_OSR_1X,       //!< Default oversampling rates
+  BME680_OSR_2X,
+  BME680_OSR_4X,
+  BME680_OSR_8X,
+  BME680_OSR_16X
 } bme680_oversampling_rate_t;
 
 /**
@@ -74,16 +76,16 @@ typedef enum {
  */
 typedef struct
 {
-    bme680_oversampling_rate_t osr_temperature; //!< T oversampling rate (default `BME680_OSR_1X`)
-    bme680_oversampling_rate_t osr_pressure;    //!< P oversampling rate (default `BME680_OSR_1X`)
-    bme680_oversampling_rate_t osr_humidity;    //!< H oversampling rate (default `BME680_OSR_1X`)
-    bme680_filter_size_t filter_size;           //!< IIR filter size (default `BME680_IIR_SIZE_3`)
+  bme680_oversampling_rate_t osr_temperature; //!< T oversampling rate (default `BME680_OSR_1X`)
+  bme680_oversampling_rate_t osr_pressure;    //!< P oversampling rate (default `BME680_OSR_1X`)
+  bme680_oversampling_rate_t osr_humidity;    //!< H oversampling rate (default `BME680_OSR_1X`)
+  bme680_filter_size_t filter_size;           //!< IIR filter size (default `BME680_IIR_SIZE_3`)
 
-    int8_t heater_profile;                      //!< Heater profile used (default 0)
-    uint16_t heater_temperature[10];            //!< Heater temperature for G (default 320)
-    uint16_t heater_duration[10];               //!< Heater duration for G (default 150)
+  int8_t heater_profile;           //!< Heater profile used (default 0)
+  uint16_t heater_temperature[10]; //!< Heater temperature for G (default 320)
+  uint16_t heater_duration[10];    //!< Heater duration for G (default 150)
 
-    int8_t ambient_temperature;                 //!< Ambient temperature for G (default 25)
+  int8_t ambient_temperature; //!< Ambient temperature for G (default 25)
 } bme680_settings_t;
 
 /**
@@ -94,37 +96,37 @@ typedef struct
  */
 typedef struct
 {
-    uint16_t par_t1;         //!< calibration data for temperature compensation
-    int16_t  par_t2;
-    int8_t   par_t3;
+  uint16_t par_t1; //!< calibration data for temperature compensation
+  int16_t par_t2;
+  int8_t par_t3;
 
-    uint16_t par_p1;         //!< calibration data for pressure compensation
-    int16_t  par_p2;
-    int8_t   par_p3;
-    int16_t  par_p4;
-    int16_t  par_p5;
-    int8_t   par_p7;
-    int8_t   par_p6;
-    int16_t  par_p8;
-    int16_t  par_p9;
-    uint8_t  par_p10;
+  uint16_t par_p1; //!< calibration data for pressure compensation
+  int16_t par_p2;
+  int8_t par_p3;
+  int16_t par_p4;
+  int16_t par_p5;
+  int8_t par_p7;
+  int8_t par_p6;
+  int16_t par_p8;
+  int16_t par_p9;
+  uint8_t par_p10;
 
-    uint16_t par_h1;         //!< calibration data for humidity compensation
-    uint16_t par_h2;
-    int8_t   par_h3;
-    int8_t   par_h4;
-    int8_t   par_h5;
-    uint8_t  par_h6;
-    int8_t   par_h7;
+  uint16_t par_h1; //!< calibration data for humidity compensation
+  uint16_t par_h2;
+  int8_t par_h3;
+  int8_t par_h4;
+  int8_t par_h5;
+  uint8_t par_h6;
+  int8_t par_h7;
 
-    int8_t   par_gh1;        //!< calibration data for gas compensation
-    int16_t  par_gh2;
-    int8_t   par_gh3;
+  int8_t par_gh1; //!< calibration data for gas compensation
+  int16_t par_gh2;
+  int8_t par_gh3;
 
-    int32_t  t_fine;         //!< temperature correction factor for P and G
-    uint8_t  res_heat_range;
-    int8_t   res_heat_val;
-    int8_t   range_sw_err;
+  int32_t t_fine; //!< temperature correction factor for P and G
+  uint8_t res_heat_range;
+  int8_t res_heat_val;
+  int8_t range_sw_err;
 } bme680_calib_data_t;
 
 /**
@@ -132,13 +134,13 @@ typedef struct
  */
 typedef struct
 {
-    i2c_dev_t i2c_dev;              //!< I2C device descriptor
+  i2c_dev_t i2c_dev; //!< I2C device descriptor
 
-    bool meas_started;              //!< Indicates whether measurement started
-    uint8_t meas_status;            //!< Last sensor status (for internal use only)
+  bool meas_started;   //!< Indicates whether measurement started
+  uint8_t meas_status; //!< Last sensor status (for internal use only)
 
-    bme680_settings_t settings;     //!< Sensor settings
-    bme680_calib_data_t calib_data; //!< Calibration data of the sensor
+  bme680_settings_t settings;     //!< Sensor settings
+  bme680_calib_data_t calib_data; //!< Calibration data of the sensor
 } bme680_t;
 
 /**
@@ -310,7 +312,7 @@ esp_err_t bme680_measure_float(bme680_t *dev, bme680_values_float_t *results);
  * @return `ESP_OK` on success
  */
 esp_err_t bme680_set_oversampling_rates(bme680_t *dev, bme680_oversampling_rate_t osr_t,
-        bme680_oversampling_rate_t osr_p, bme680_oversampling_rate_t osr_h);
+                                        bme680_oversampling_rate_t osr_p, bme680_oversampling_rate_t osr_h);
 
 /**
  * @brief   Set the size of the IIR filter

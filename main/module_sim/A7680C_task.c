@@ -1,13 +1,12 @@
-
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <esp_log.h>
 
-#include "module_sim.h"
+#include "A7680C.h"
 
 static TaskHandle_t ModuleSim_TaskHandle;
-static QueueHandle_t ModuleSim_queue;
+QueueHandle_t ModuleSim_queue;
 
 static const char *TAG = "Module_SIM_Queue";
 
@@ -24,7 +23,7 @@ void ModuleSim_task(void *parameter)
   {
     if (uxQueueMessagesWaiting(ModuleSim_queue) > 0)
     {
-      if (xQueueReceive(ModuleSim_queue, msg, 0) == pdTRUE)
+      if (xQueueReceive(ModuleSim_queue, msg, pdMS_TO_TICKS(100)) == pdTRUE)
       {
         // TODO
       }
@@ -40,7 +39,7 @@ int ModuleSim_Task_Init()
 
   if (taskCreated != pdTRUE)
   {
-    ESP_LOGI(TAG, "Failed to create task");
+    ESP_LOGE(TAG, "Failed to create task");
     return taskCreated;
   }
   return taskCreated;
