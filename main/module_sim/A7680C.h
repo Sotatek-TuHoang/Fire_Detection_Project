@@ -3,8 +3,11 @@
 
 #include "driver/gpio.h"
 
+#define BROKER_ADDR "broker.hivemq.com"
+#define BROKER_PORT "1883"
+
 int ModuleSim_Task_Init();
 
-void send_sms(char *phone_num, char *msg);
+void connect_mqtt_broker();
 
 #endif // __A7680C_H__

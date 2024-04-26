@@ -8,7 +8,7 @@
 static TaskHandle_t ModuleSim_TaskHandle;
 QueueHandle_t ModuleSim_queue;
 
-static const char *TAG = "Module_SIM_Queue";
+static const char *TAG = "Module_sim_task";
 
 void ModuleSim_task(void *parameter)
 {

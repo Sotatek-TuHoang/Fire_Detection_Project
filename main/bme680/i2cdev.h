@@ -16,6 +16,11 @@
 
 #define CONFIG_I2CDEV_TIMEOUT 1000
 
+#define BME680_I2C_ADDR 0x77
+#define PORT 0
+#define BME680_I2C_MASTER_SDA 21
+#define BME680_I2C_MASTER_SCL 22
+
 #include <soc/i2c_reg.h>
 #if defined(I2C_TIME_OUT_VALUE_V)
 #define I2CDEV_MAX_STRETCH_TIME I2C_TIME_OUT_VALUE_V

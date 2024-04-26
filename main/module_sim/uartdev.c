@@ -10,9 +10,9 @@
 
 QueueHandle_t uart_msg_queue;
 
-int ModuleSim_uart_init()
+esp_err_t ModuleSim_uart_init()
 {
-  int ret;
+  esp_err_t ret;
   uart_config_t uart_config = {
       .baud_rate = 115200,
       .data_bits = UART_DATA_8_BITS,
@@ -31,21 +31,38 @@ int ModuleSim_uart_init()
   return ret;
 }
 
-int AT_tx(char *cmd)
+esp_err_t AT_tx(char *cmd, uint64_t delay_ms)
 {
-  int ret;
-  ret = uart_write_bytes(UART_NUM_1, cmd, strlen(cmd) + 1);
+  esp_err_t ret;
+  ret = uart_write_bytes(UART_NUM_1, cmd, strlen(cmd));
+  vTaskDelay(pdMS_TO_TICKS(delay_ms));
   return ret;
 }
 
-int AT_rx(char *buf)
+int AT_rx(char *buf, size_t buf_size)
 {
   uart_event_t uart_event;
-  if (xQueueReceive(uart_msg_queue, (void *)&uart_event, (TickType_t)50))
-    return uart_read_bytes(UART_NUM_1, buf, uart_event.size * 2, 100);
-  else
-    return -1;
+  int total_bytes = 0;
+  while (xQueueReceive(uart_msg_queue, (void *)&uart_event, (TickType_t)50))
+  {
+    int bytes = uart_read_bytes(UART_NUM_1, buf + total_bytes, uart_event.size, 100);
+    if (bytes > 0)
+    {
+      total_bytes += bytes;
+      if (total_bytes >= buf_size - 1)
+      {
+        break;
+      }
+    }
+    else
+    {
+      break;
+    }
+  }
+  buf[total_bytes] = '\0'; // Null-terminate the received string
+  return total_bytes;
 }
+
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
 /****************************************************************************/
