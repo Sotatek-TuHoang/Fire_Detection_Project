@@ -6,8 +6,10 @@
 #define BROKER_ADDR "broker.hivemq.com"
 #define BROKER_PORT "1883"
 
-int ModuleSim_Task_Init();
+int module_sim_task_init();
 
-void connect_mqtt_broker();
+void module_sim_connect_mqtt_broker();
+
+void module_sim_pub_data(float temp, float humi, float press, float voc);
 
 #endif // __A7680C_H__

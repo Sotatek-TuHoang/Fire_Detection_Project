@@ -6,7 +6,7 @@
 
 #define BUF_SIZE 1024
 
-esp_err_t ModuleSim_uart_init();
+esp_err_t module_sim_uart_init();
 
 esp_err_t AT_tx(char *cmd, uint64_t delay_ms);
 

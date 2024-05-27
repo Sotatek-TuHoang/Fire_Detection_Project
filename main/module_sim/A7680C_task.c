@@ -10,7 +10,7 @@ QueueHandle_t ModuleSim_queue;
 
 static const char *TAG = "Module_sim_task";
 
-void ModuleSim_task(void *parameter)
+void module_sim_task(void *parameter)
 {
   uint8_t msg[100];
   ModuleSim_queue = xQueueCreate(5, sizeof(msg));
@@ -33,9 +33,9 @@ void ModuleSim_task(void *parameter)
   }
 }
 
-int ModuleSim_Task_Init()
+int module_sim_task_init()
 {
-  BaseType_t taskCreated = xTaskCreate(ModuleSim_task, "ModuleSim_Task", 4096, NULL, 10, &ModuleSim_TaskHandle);
+  BaseType_t taskCreated = xTaskCreate(module_sim_task, "module_sim_Task", 4096, NULL, 10, &ModuleSim_TaskHandle);
 
   if (taskCreated != pdTRUE)
   {

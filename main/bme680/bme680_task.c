@@ -8,12 +8,16 @@
 #include "bme680.h"
 #include "i2cdev.h"
 
+#include "wifi_mqtt/mqtt.h"
+#include "module_sim/A7680C.h"
+
 bme680_t sensor;
 bme680_values_float_t bme680_values;
 uint32_t duration;
 
 TaskHandle_t bme680_TaskHandle = NULL;
 extern QueueHandle_t ModuleSim_queue;
+extern bool is_wifi_connect;
 
 static const char *TAG = "BME680_task";
 
@@ -70,13 +74,17 @@ void bme680_task(void *parameter)
     if (ret == ESP_OK)
     {
       ESP_LOGI(TAG, "BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f KOhm\n", bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
+      if (is_wifi_connect)
+        wifi_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
+      else
+        module_sim_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
     }
     else
     {
       ESP_LOGE(TAG, "Reading error: %d", ret);
     }
     // Delay
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 

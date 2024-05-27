@@ -10,7 +10,7 @@
 
 QueueHandle_t uart_msg_queue;
 
-esp_err_t ModuleSim_uart_init()
+esp_err_t module_sim_uart_init()
 {
   esp_err_t ret;
   uart_config_t uart_config = {
