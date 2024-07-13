@@ -18,8 +18,8 @@
 
 #define BME680_I2C_ADDR 0x77
 #define PORT 0
-#define BME680_I2C_MASTER_SDA 21
-#define BME680_I2C_MASTER_SCL 22
+#define BME680_I2C_MASTER_SDA 5
+#define BME680_I2C_MASTER_SCL 6
 
 #include <soc/i2c_reg.h>
 #if defined(I2C_TIME_OUT_VALUE_V)

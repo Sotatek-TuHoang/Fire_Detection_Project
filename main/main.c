@@ -15,13 +15,20 @@
 #include "wifi_mqtt/nvs.h"
 
 extern int bme680_task_init();
+extern bool is_wifi_connect;
 void app_main()
 {
-  module_sim_uart_init();
-  // connect_mqtt_broker();
   button_init(18);
   nvs_flash_func_init();
   wifi_func_init();
-  wifi_mqtt_func_init();
+
+  if (is_wifi_connect)
+    wifi_mqtt_func_init();
+
+  vTaskDelay(pdMS_TO_TICKS(2000));
+
+  module_sim_uart_init();
+  module_sim_connect_mqtt_broker();
+
   bme680_task_init();
 }

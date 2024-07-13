@@ -13,7 +13,7 @@
 #define WIFI_H_
 
 #define PRE_FIX "HUST_"
-#define PASS_PROV "hust1234"
+#define PASS_PROV "abcd1234"
 
 /**
  * @brief   Initialize Wi-Fi functionality, event handlers, and provisioning.

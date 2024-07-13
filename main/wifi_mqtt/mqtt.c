@@ -1,5 +1,5 @@
 /***************************************************************************
- * @file 	bmqtt.c
+ * @file 	mqtt.c
  * @author 	tuha
  * @date 	5 July 2023
  * @brief	module for send data through mqtt
@@ -58,7 +58,6 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG_MQTT, "MQTT_EVENT_DISCONNECTED");
     wifi_mqtt_reconnect();
-    // esp_restart();
     break;
 
   case MQTT_EVENT_SUBSCRIBED:
@@ -137,7 +136,7 @@ void wifi_pub_data(float temp, float humi, float press, float voc)
   cJSON_AddNumberToObject(values, "Temp", temp);
   cJSON_AddNumberToObject(values, "Humi", humi);
   cJSON_AddNumberToObject(values, "Press", press);
-  cJSON_AddNumberToObject(values, "VOC", humi);
+  cJSON_AddNumberToObject(values, "VOC", voc);
   cJSON_AddNumberToObject(json_data, "trans_code", trans_code++);
 
   char *json_str = cJSON_PrintUnformatted(json_data);                 // Convert the JSON object to a string

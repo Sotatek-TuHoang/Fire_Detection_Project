@@ -1,5 +1,6 @@
 #include <string.h>
 #include "esp_log.h"
+#include <math.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -38,11 +39,11 @@ void init_bme680(void)
   bme680_set_filter_size(&sensor, BME680_IIR_SIZE_7);
 
   // Change the heater profile 0 to 200 degree Celsius for 100 ms.
-  bme680_set_heater_profile(&sensor, 0, 200, 100);
+  bme680_set_heater_profile(&sensor, 0, 320, 80);
   bme680_use_heater_profile(&sensor, 0);
 
-  // Set ambient temperature to 10 degree Celsius
-  bme680_set_ambient_temperature(&sensor, 10);
+  // Set ambient temperature to 25 degree Celsius
+  bme680_set_ambient_temperature(&sensor, 25);
 
   // as long as sensor configuration isn't changed, duration is constant
   bme680_get_measurement_duration(&sensor, &duration);
@@ -59,7 +60,9 @@ static esp_err_t get_bme680_readings(void)
     vTaskDelay(duration);
 
     // get the results and do something with them
-    return bme680_get_results_float(&sensor, &bme680_values);
+    ret = bme680_get_results_float(&sensor, &bme680_values);
+
+    return ret;
   }
   else
     return ret;

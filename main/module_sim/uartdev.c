@@ -5,6 +5,7 @@
 #include "driver/uart.h"
 #include <string.h>
 #include <stdio.h>
+#include "driver/gpio.h"
 
 #include "uartdev.h"
 
@@ -12,6 +13,15 @@ QueueHandle_t uart_msg_queue;
 
 esp_err_t module_sim_uart_init()
 {
+
+  gpio_reset_pin(UART_RST);
+  /* Set the GPIO as a push/pull output */
+  gpio_set_direction(UART_RST, UART_RST);
+  gpio_set_level(UART_RST, 0);
+  vTaskDelay(pdMS_TO_TICKS(200));
+  gpio_set_level(UART_RST, 1);
+  vTaskDelay(pdMS_TO_TICKS(1000));
+
   esp_err_t ret;
   uart_config_t uart_config = {
       .baud_rate = 115200,
@@ -41,26 +51,8 @@ esp_err_t AT_tx(char *cmd, uint64_t delay_ms)
 
 int AT_rx(char *buf, size_t buf_size)
 {
-  uart_event_t uart_event;
-  int total_bytes = 0;
-  while (xQueueReceive(uart_msg_queue, (void *)&uart_event, (TickType_t)50))
-  {
-    int bytes = uart_read_bytes(UART_NUM_1, buf + total_bytes, uart_event.size, 100);
-    if (bytes > 0)
-    {
-      total_bytes += bytes;
-      if (total_bytes >= buf_size - 1)
-      {
-        break;
-      }
-    }
-    else
-    {
-      break;
-    }
-  }
-  buf[total_bytes] = '\0'; // Null-terminate the received string
-  return total_bytes;
+  uart_flush_input(UART_NUM_1);
+  return uart_read_bytes(UART_NUM_1, buf, 512, 1000);
 }
 
 /****************************************************************************/

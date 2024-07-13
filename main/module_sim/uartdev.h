@@ -2,7 +2,8 @@
 #define __UARTDEV_H__
 
 #define UART_TX 22
-#define UART_RX 23
+#define UART_RX 21
+#define UART_RST 23
 
 #define BUF_SIZE 1024
 

@@ -9,6 +9,7 @@
 #include "cJSON.h"
 #include <time.h>
 #include <stdio.h>
+#include "esp_random.h"
 
 #include "A7680C.h"
 #include "uartdev.h"
@@ -28,13 +29,14 @@ void create_client_id(char *client_id)
 {
   char str_rd[13];
   const char char_pool[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  srand(time(NULL));
+
   for (int i = 0; i < 12; ++i)
   {
-    int idx = rand() % (sizeof(char_pool) - 1);
+    int idx = esp_random() % (sizeof(char_pool) - 1);
     str_rd[i] = char_pool[idx];
   }
   str_rd[12] = '\0';
+
   snprintf(client_id, 27, "%s%s", str_mac, str_rd);
 }
 
@@ -45,29 +47,65 @@ void module_sim_get_mac()
   sprintf(str_mac, "%02X%02X%02X%02X%02X%02X", mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
 }
 
+void check_reg()
+{
+
+  snprintf(cmd, sizeof(cmd), "AT+CNBP?\r\n");
+  AT_tx(cmd, 200);
+
+  snprintf(cmd, sizeof(cmd), "AT+CPIN?\r\n");
+  AT_tx(cmd, 200);
+
+  snprintf(cmd, sizeof(cmd), "AT+CPIN?\r\n");
+  AT_tx(cmd, 200);
+
+  snprintf(cmd, sizeof(cmd), "AT+CIMI\r\n");
+  AT_tx(cmd, 200);
+
+  snprintf(cmd, sizeof(cmd), "AT+CSQ\r\n");
+  AT_tx(cmd, 200);
+}
+
 void module_sim_connect_mqtt_broker()
 {
   module_sim_get_mac();
   char client_id[27];
   create_client_id(client_id);
 
+  snprintf(cmd, sizeof(cmd), "AT+CRESET\r\n");
+
+  vTaskDelay(pdMS_TO_TICKS(3000));
+
+  check_reg();
+
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTDISC=0,60\r\n");
+  AT_tx(cmd, 500);
+
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTREL=0\r\n");
+  AT_tx(cmd, 500);
+
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTSTOP\r\n");
+  AT_tx(cmd, 500);
+
   snprintf(cmd, sizeof(cmd), "AT+CMQTTSTART\r\n");
-  AT_tx(cmd, 200);
+  AT_tx(cmd, 500);
 
   snprintf(cmd, sizeof(cmd), "AT+CMQTTACCQ=0,\"%s\",0\r\n", client_id);
-  AT_tx(cmd, 200);
+  AT_tx(cmd, 1000);
 
   snprintf(cmd, sizeof(cmd), "AT+CMQTTCONNECT=0,\"tcp://%s:%s\",60,1\r\n", BROKER_ADDR, BROKER_PORT);
-  AT_tx(cmd, 200);
+  AT_tx(cmd, 1000);
 }
 
 void module_sim_pub_data(float temp, float humi, float press, float voc)
 {
-  snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=0,38\r\n");
-  AT_tx(cmd, 100);
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=0,37\r\n");
+  AT_tx(cmd, 500);
 
   snprintf(cmd, sizeof(cmd), "FIRE_DETECTION/%s/Telemetry\r\n", str_mac);
-  AT_tx(cmd, 100);
+  AT_tx(cmd, 500);
+
+  ESP_LOGI(TAG, "Pub to topic: %s", cmd);
 
   cJSON *json_data = cJSON_CreateObject(); // Create a JSON object for the data
   cJSON_AddStringToObject(json_data, "Device_ID", str_mac);
@@ -76,22 +114,28 @@ void module_sim_pub_data(float temp, float humi, float press, float voc)
   cJSON_AddNumberToObject(values, "Temp", temp);
   cJSON_AddNumberToObject(values, "Humi", humi);
   cJSON_AddNumberToObject(values, "Press", press);
-  cJSON_AddNumberToObject(values, "VOC", humi);
+  cJSON_AddNumberToObject(values, "VOC", voc);
   cJSON_AddNumberToObject(json_data, "trans_code", trans_code++);
   char *json_str = cJSON_PrintUnformatted(json_data); // Convert the JSON object to a string
+
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=0,%u\r\n", strlen(json_str));
+  AT_tx(cmd, 500);
+
+  snprintf(cmd, sizeof(cmd), "%s", json_str);
+  AT_tx(cmd, 500);
   cJSON_Delete(json_data);
-
-  uint16_t data_len = strlen(json_str);
-  snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=0,%u\r\n", data_len);
-  AT_tx(cmd, 100);
-
-  snprintf(cmd, sizeof(cmd), "%s\r\n", json_str);
-  AT_tx(cmd, 100);
   free(json_str);
 
-  snprintf(cmd, sizeof(cmd), "AT+CMQTTPUB=0,0,60\r\n");
-  AT_tx(cmd, 100);
+  snprintf(cmd, sizeof(cmd), "AT+CMQTTPUB=0,1,60,0\r\n");
+  AT_tx(cmd, 500);
 }
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
 /****************************************************************************/
+
+// AT+CMQTTSTART<CR><LF>
+// AT+CMQTTACCQ=0,"mn180799anhtu",0<CR><LF>
+// AT+CMQTTCONNECT=0,"tcp://broker.hivemq.com:1883",20,1<CR><LF>
+// AT+CMQTTTOPIC=0,38<CR><LF>
+// 404CCAFFFE4EXd4PoKWwUlPd
+// 404CCAFFFE4EXd4PoKWwUlPd
