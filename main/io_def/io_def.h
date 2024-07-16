@@ -17,4 +17,7 @@
 // button config wifi
 #define CONFIG_WIFI_BUTTON 18
 
+#define CO2_WARNING_THRESHOLD 25 // kOhm
+#define TIME_SENSOR_STABLE 180   // sec
+
 #endif // IO_DEF_H

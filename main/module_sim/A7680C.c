@@ -129,13 +129,18 @@ void module_sim_pub_data(float temp, float humi, float press, float voc)
   snprintf(cmd, sizeof(cmd), "AT+CMQTTPUB=0,1,60,0\r\n");
   AT_tx(cmd, 500);
 }
+
+void module_sim_send_sms(char *text, char *phone_number)
+{
+  snprintf(cmd, sizeof(cmd), "AT+CSCS=\"GSM\"\r\n");
+  AT_tx(cmd, 500);
+
+  snprintf(cmd, sizeof(cmd), "AT+CMGS=\"%s\"\r\n", phone_number);
+  AT_tx(cmd, 500);
+
+  snprintf(cmd, sizeof(cmd), "%s\r\n", text);
+  AT_tx(cmd, 500);
+}
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
 /****************************************************************************/
-
-// AT+CMQTTSTART<CR><LF>
-// AT+CMQTTACCQ=0,"mn180799anhtu",0<CR><LF>
-// AT+CMQTTCONNECT=0,"tcp://broker.hivemq.com:1883",20,1<CR><LF>
-// AT+CMQTTTOPIC=0,38<CR><LF>
-// 404CCAFFFE4EXd4PoKWwUlPd
-// 404CCAFFFE4EXd4PoKWwUlPd

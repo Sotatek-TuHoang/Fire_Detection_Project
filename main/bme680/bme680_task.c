@@ -43,7 +43,7 @@ void init_bme680(void)
   // Change the IIR filter size for temperature and pressure to 7.
   bme680_set_filter_size(&sensor, BME680_IIR_SIZE_7);
 
-  // Change the heater profile 0 to 200 degree Celsius for 100 ms.
+  // Change the heater profile 0 to 290 degree Celsius for 100 ms.
   bme680_set_heater_profile(&sensor, 0, 290, 100);
   bme680_use_heater_profile(&sensor, 0);
 
@@ -82,8 +82,10 @@ void bme680_task(void *parameter)
     ret = get_bme680_readings();
     if (ret == ESP_OK)
     {
-      stable_sensor_status++;
-      if (stable_sensor_status == 120)
+      if (!is_stable_sensor)
+        stable_sensor_status++;
+
+      if (stable_sensor_status >= TIME_SENSOR_STABLE)
         is_stable_sensor = true;
     }
     else
@@ -103,12 +105,12 @@ void warning_task(void *parameter)
   {
     if (is_stable_sensor)
     {
-      if (bme680_values.gas_resistance <= 25 && !is_warning)
+      if (bme680_values.gas_resistance <= CO2_WARNING_THRESHOLD && !is_warning)
       {
         relay_set_status_pump(RELAY_ON);
         is_warning = true;
       }
-      else if (bme680_values.gas_resistance > 25 && is_warning)
+      else if (bme680_values.gas_resistance > CO2_WARNING_THRESHOLD && is_warning)
       {
         relay_set_status_pump(RELAY_OFF);
         is_warning = false;

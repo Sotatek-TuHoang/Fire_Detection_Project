@@ -12,4 +12,6 @@ void module_sim_connect_mqtt_broker();
 
 void module_sim_pub_data(float temp, float humi, float press, float voc);
 
+void module_sim_send_sms(char *text, char *phone_number);
+
 #endif // __A7680C_H__
