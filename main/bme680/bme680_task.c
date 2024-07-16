@@ -11,13 +11,18 @@
 
 #include "wifi_mqtt/mqtt.h"
 #include "module_sim/A7680C.h"
+#include "relay/relay.h"
 
 bme680_t sensor;
 bme680_values_float_t bme680_values;
 uint32_t duration;
 
 TaskHandle_t bme680_TaskHandle = NULL;
-extern QueueHandle_t ModuleSim_queue;
+TaskHandle_t pulish_data_TaskHandle = NULL;
+TaskHandle_t warning_task_TaskHandle = NULL;
+
+bool is_stable_sensor = false;
+
 extern bool is_wifi_connect;
 
 static const char *TAG = "BME680_task";
@@ -39,7 +44,7 @@ void init_bme680(void)
   bme680_set_filter_size(&sensor, BME680_IIR_SIZE_7);
 
   // Change the heater profile 0 to 200 degree Celsius for 100 ms.
-  bme680_set_heater_profile(&sensor, 0, 320, 80);
+  bme680_set_heater_profile(&sensor, 0, 290, 100);
   bme680_use_heater_profile(&sensor, 0);
 
   // Set ambient temperature to 25 degree Celsius
@@ -71,20 +76,66 @@ static esp_err_t get_bme680_readings(void)
 void bme680_task(void *parameter)
 {
   esp_err_t ret;
+  uint16_t stable_sensor_status = 0;
   for (;;)
   {
     ret = get_bme680_readings();
     if (ret == ESP_OK)
     {
-      ESP_LOGI(TAG, "BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f KOhm\n", bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
-      if (is_wifi_connect)
-        wifi_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
-      else
-        module_sim_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
+      stable_sensor_status++;
+      if (stable_sensor_status == 120)
+        is_stable_sensor = true;
     }
     else
     {
       ESP_LOGE(TAG, "Reading error: %d", ret);
+      is_stable_sensor = false;
+    }
+    // Delay
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
+
+void warning_task(void *parameter)
+{
+  bool is_warning = false;
+  for (;;)
+  {
+    if (is_stable_sensor)
+    {
+      if (bme680_values.gas_resistance <= 25 && !is_warning)
+      {
+        relay_set_status_pump(RELAY_ON);
+        is_warning = true;
+      }
+      else if (bme680_values.gas_resistance > 25 && is_warning)
+      {
+        relay_set_status_pump(RELAY_OFF);
+        is_warning = false;
+      }
+
+      if (is_warning)
+      {
+        relay_set_status_buzzer(RELAY_ON);
+        vTaskDelay(pdMS_TO_TICKS(500));
+        relay_set_status_buzzer(RELAY_OFF);
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
+void publish_data_task(void *parameter)
+{
+  for (;;)
+  {
+    ESP_LOGI(TAG, "BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f KOhm\n", bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
+    if (is_stable_sensor)
+    {
+      if (is_wifi_connect)
+        wifi_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
+      else
+        module_sim_pub_data(bme680_values.temperature, bme680_values.humidity, bme680_values.pressure, bme680_values.gas_resistance);
     }
     // Delay
     vTaskDelay(pdMS_TO_TICKS(5000));
@@ -95,12 +146,26 @@ int bme680_task_init()
 {
   ESP_ERROR_CHECK(i2cdev_init());
   init_bme680();
-  BaseType_t taskCreated = xTaskCreate(bme680_task, "bme680_task", 4096, NULL, 10, &bme680_TaskHandle);
-
+  BaseType_t taskCreated = xTaskCreate(bme680_task, "bme680_task", 2048, NULL, 10, &bme680_TaskHandle);
   if (taskCreated != pdTRUE)
   {
-    ESP_LOGE(TAG, "Failed to create task");
+    ESP_LOGE(TAG, "Failed to create bme680_task");
     return taskCreated;
   }
+
+  taskCreated = xTaskCreate(publish_data_task, "publish_data_task", 4096, NULL, 10, &pulish_data_TaskHandle);
+  if (taskCreated != pdTRUE)
+  {
+    ESP_LOGE(TAG, "Failed to create publish_data_task");
+    return taskCreated;
+  }
+
+  taskCreated = xTaskCreate(warning_task, "warning_task", 2048, NULL, 10, &warning_task_TaskHandle);
+  if (taskCreated != pdTRUE)
+  {
+    ESP_LOGE(TAG, "Failed to create warning_task");
+    return taskCreated;
+  }
+
   return taskCreated;
 }

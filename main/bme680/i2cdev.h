@@ -13,13 +13,12 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_err.h>
+#include "io_def/io_def.h"
 
 #define CONFIG_I2CDEV_TIMEOUT 1000
 
 #define BME680_I2C_ADDR 0x77
 #define PORT 0
-#define BME680_I2C_MASTER_SDA 5
-#define BME680_I2C_MASTER_SCL 6
 
 #include <soc/i2c_reg.h>
 #if defined(I2C_TIME_OUT_VALUE_V)

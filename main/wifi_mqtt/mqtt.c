@@ -17,6 +17,8 @@
 #include "cJSON.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+#include "esp_system.h"
+#include "esp_mac.h"
 
 #include "wifi_mqtt/mqtt.h"
 
@@ -118,7 +120,7 @@ void wifi_mqtt_func_init(void)
 
   /* Get mac Address and set topic*/
   uint8_t u8mac[6];
-  esp_wifi_get_mac(ESP_IF_WIFI_STA, u8mac);
+  esp_efuse_mac_get_default(u8mac);
   snprintf(cMac_str, sizeof(cMac_str), "%02X%02X%02X%02X%02X%02X", u8mac[0], u8mac[1], u8mac[2], u8mac[3], u8mac[4], u8mac[5]);
   snprintf(cTopic_pub, sizeof(cTopic_pub), "FIRE_DETECTION/%s/Telemetry", cMac_str);
 

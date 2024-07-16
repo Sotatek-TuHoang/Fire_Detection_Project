@@ -13,12 +13,16 @@
 #include "wifi_mqtt/mqtt.h"
 #include "wifi_mqtt/wifi.h"
 #include "wifi_mqtt/nvs.h"
+#include "io_def/io_def.h"
+#include "relay/relay.h"
 
 extern int bme680_task_init();
 extern bool is_wifi_connect;
 void app_main()
 {
-  button_init(18);
+  relay_init();
+
+  button_init(CONFIG_WIFI_BUTTON);
   nvs_flash_func_init();
   wifi_func_init();
 
